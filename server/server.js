@@ -5,15 +5,24 @@ const path = require('path');
 
 const { typeDefs, resolvers } = require('./schemas');
 const db = require('./config/connection');
+const { authMiddleware } = require('./utils/auth');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
-
 
 const startApolloServer = async () => {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    context: ({ req }) => {
+      // Get the user token from the headers
+      const token = req.headers.authorization || '';
+
+      // Verify the token and attach the user data to the context
+      const user = authMiddleware(req);
+
+      return { user };
+    },
   });
 
   await server.start();
