@@ -34,8 +34,7 @@ const SearchBooks = () => {
     delete bookData.__typename;
   
     const token = Auth.loggedIn() ? Auth.getToken() : null;
-    console.log('Authentication Token:', token);
-  
+    console.log('Token before saveBook mutation:', token);
     if (!token) {
       return false;
     }
@@ -45,7 +44,7 @@ const SearchBooks = () => {
         variables: { bookData },
         context: {
           headers: {
-            authorization: `Bearer ${token}`, // Include the token in the request headers
+            authorization: `Bearer ${token}`, // Include the token in the Authorization header
           },
         },
       });
@@ -56,6 +55,7 @@ const SearchBooks = () => {
       console.error('Error saving book:', err);
     }
   };
+  
   return (
     <>
       <div className="text-light bg-dark p-5">

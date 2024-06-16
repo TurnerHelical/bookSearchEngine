@@ -6,7 +6,6 @@ const path = require('path');
 const { typeDefs, resolvers } = require('./schemas');
 const db = require('./config/connection');
 const { authMiddleware } = require('./utils/auth');
-const { log } = require('console');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -16,20 +15,21 @@ const startApolloServer = async () => {
     typeDefs,
     resolvers,
     context: ({ req }) => {
-      const token = req.headers.authorization || '';
-      console.log('Request Authorization Header:', token);
-      const user = authMiddleware(req);
-    
-      if (!user) {
-        throw new Error('Invalid or missing authentication token');
+      console.log('Request Headers:', req.headers); // Add this line
+
+      try {
+        const user = authMiddleware({ req });
+        console.log('Authenticated User:', user); // Add this line
+        return { user };
+      } catch (error) {
+        console.log('Authentication Error:', error.message); // Add this line
+        return { user: null };
       }
-    
-      console.log('User Data from Context:', user);
-      return { user };
     },
   });
 
   await server.start();
+
 
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
@@ -48,10 +48,8 @@ const startApolloServer = async () => {
     app.listen(PORT, () => {
       console.log(`API server running on port ${PORT}!`);
       console.log(`Use GraphQL at http://localhost:${PORT}/graphql`);
-      
     });
   });
 };
 
 startApolloServer();
-

@@ -6,19 +6,20 @@ const expiration = '2h';
 
 module.exports = {
   // function for our authenticated routes
-  authMiddleware: function (req) {
+  authMiddleware: function ({ req }) {
     // allows token to be sent via req.query or headers
     let token = req.query.token || req.headers.authorization;
-  
+    
+    console.log('Request Headers:', req.headers);
     // ["Bearer", "<tokenvalue>"]
     if (req.headers.authorization) {
       token = token.split(' ').pop().trim();
     }
-  
+    console.log('Received token:', token);
     if (!token) {
       throw new Error('Missing authentication token');
     }
-  
+    
     // verify token and get user data out of it
     try {
       const { username, email, _id } = jwt.verify(token, secret, { maxAge: expiration });

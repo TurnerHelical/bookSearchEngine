@@ -59,12 +59,25 @@ const resolvers = {
     },
     saveBook: async (parent, { bookData }, context) => {
       // Access the authenticated user data from context.user
+      console.log('Context User in saveBook:', context.user);
       if (context.user) {
-        const updatedUser = await User.findOneAndUpdate(
-          { _id: context.user._id },
-          { $push: { savedBooks: bookData } },
-          { new: true }
-        );
+        // Log the received bookData and context.user for debugging
+        console.log('Received bookData:', bookData);
+        console.log('Authenticated user:', context.user);
+
+        // Find the user by their ID
+        const user = await User.findById(context.user._id);
+
+        if (!user) {
+          throw new AuthenticationError('User not found');
+        }
+
+        // Add the new book to the user's savedBooks array
+        user.savedBooks.push(bookData);
+
+        // Save the updated user
+        const updatedUser = await user.save();
+
         return updatedUser;
       } else {
         throw new AuthenticationError('You need to be logged in!');
