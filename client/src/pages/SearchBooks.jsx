@@ -19,7 +19,7 @@ const SearchBooks = () => {
 
   const searchedBooks = data?.searchBooks || [];
 
-  const [saveBook, { error }] = useMutation(SAVE_BOOK);
+  const [saveBook] = useMutation(SAVE_BOOK)
 
   useEffect(() => {
     return () => saveBookIds(savedBookIds);

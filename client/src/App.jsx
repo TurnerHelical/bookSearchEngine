@@ -4,6 +4,8 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import Navbar from './components/Navbar';
 import './App.css';
 
+const cache = new InMemoryCache();
+
 const client = new ApolloClient({
   request: (operation) => {
     const token = localStorage.getItem("id_token");
@@ -15,6 +17,7 @@ const client = new ApolloClient({
     });
   },
   uri: "/graphql",
+  cache: cache,
 });
 
 function App() {
