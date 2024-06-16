@@ -5,8 +5,16 @@ import Navbar from './components/Navbar';
 import './App.css';
 
 const client = new ApolloClient({
-  uri: '/graphql',
-  cache: new InMemoryCache(),
+  request: (operation) => {
+    const token = localStorage.getItem("id_token");
+
+    operation.setContext({
+      headers: {
+        authorization: token ? `Bearer ${token}` : "",
+      },
+    });
+  },
+  uri: "/graphql",
 });
 
 function App() {

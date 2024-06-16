@@ -6,6 +6,7 @@ import Auth from '../utils/auth';
 import { SEARCH_BOOKS } from '../utils/queries';
 import { SAVE_BOOK } from '../utils/mutations';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
+import { GET_ME } from '../utils/queries';
 
 const SearchBooks = () => {
   const [searchInput, setSearchInput] = useState('');
@@ -30,26 +31,21 @@ const SearchBooks = () => {
 
   const handleSaveBook = async (bookId) => {
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-    const bookData = { ...bookToSave };
-    delete bookData.__typename;
   
     const token = Auth.loggedIn() ? Auth.getToken() : null;
-    console.log('Token before saveBook mutation:', token);
+  
     if (!token) {
       return false;
     }
   
     try {
-      const { data } = await saveBook({
-        variables: { bookData },
-        context: {
-          headers: {
-            authorization: `Bearer ${token}`, // Include the token in the Authorization header
-          },
-        },
+      await saveBook({
+        variables: {$bookData: bookToSave},
+        update: cache => {
+          const {me} = cache.readQuery({ query: GET_ME });
+          cache.writeQuery({ query: GET_ME , data: {me: { ...me, savedBooks: [...me.savedBooks, bookToSave] } } })
+        }
       });
-      console.log('Mutation Response:', data);
-      console.log('savedBookIds after:', [...savedBookIds, bookToSave.bookId]);
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
       console.error('Error saving book:', err);

@@ -15,6 +15,7 @@ const startApolloServer = async () => {
     typeDefs,
     resolvers,
     context: ({ req }) => {
+      console.log('Request Object in Context:', req);
       console.log('Request Headers:', req.headers); // Add this line
 
       try {

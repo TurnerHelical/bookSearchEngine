@@ -57,32 +57,17 @@ const resolvers = {
       const token = signToken(user);
       return { token, user };
     },
-    saveBook: async (parent, { bookData }, context) => {
-      // Access the authenticated user data from context.user
-      console.log('Context User in saveBook:', context.user);
+    saveBook: async (parent, { book }, context) => {
       if (context.user) {
-        // Log the received bookData and context.user for debugging
-        console.log('Received bookData:', bookData);
-        console.log('Authenticated user:', context.user);
-
-        // Find the user by their ID
-        const user = await User.findById(context.user._id);
-
-        if (!user) {
-          throw new AuthenticationError('User not found');
-        }
-
-        // Add the new book to the user's savedBooks array
-        user.savedBooks.push(bookData);
-
-        // Save the updated user
-        const updatedUser = await user.save();
-
-        return updatedUser;
-      } else {
-        throw new AuthenticationError('You need to be logged in!');
+          const updatedUser = await User.findOneAndUpdate(
+              { _id: context.user._id },
+              { $addToSet: {savedBooks: book} },
+              { new: true }
+          )
+          return updatedUser;
       }
-    },
+      throw new AuthenticationError('You need to be logged in!')
+  },
 
     removeBook: async (parent, { bookId }, context) => {
       if (context.user) {
