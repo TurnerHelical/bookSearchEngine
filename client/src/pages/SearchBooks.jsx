@@ -30,24 +30,32 @@ const SearchBooks = () => {
 
   const handleSaveBook = async (bookId) => {
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-
+    const bookData = { ...bookToSave };
+    delete bookData.__typename;
+  
     const token = Auth.loggedIn() ? Auth.getToken() : null;
-
+    console.log('Authentication Token:', token);
+  
     if (!token) {
       return false;
     }
-
+  
     try {
       const { data } = await saveBook({
-        variables: { bookData: { ...bookToSave } },
+        variables: { bookData },
+        context: {
+          headers: {
+            authorization: `Bearer ${token}`, // Include the token in the request headers
+          },
+        },
       });
-      console.log(savedBookIds);
+      console.log('Mutation Response:', data);
+      console.log('savedBookIds after:', [...savedBookIds, bookToSave.bookId]);
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
       console.error('Error saving book:', err);
     }
   };
-
   return (
     <>
       <div className="text-light bg-dark p-5">
@@ -80,8 +88,8 @@ const SearchBooks = () => {
           {loading
             ? 'Loading...'
             : searchedBooks.length
-            ? `Viewing ${searchedBooks.length} results:`
-            : 'Search for a book to begin'}
+              ? `Viewing ${searchedBooks.length} results:`
+              : 'Search for a book to begin'}
         </h2>
         <Row>
           {searchedBooks.map((book) => {
